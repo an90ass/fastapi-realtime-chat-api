@@ -225,3 +225,49 @@ API documentation is available at `http://localhost:8000/docs`.
 ## Project Structure Notes
 
 The domain and application layers contain zero references to FastAPI, SQLAlchemy, Redis, or Pydantic. This is verified by an AST-based import scanner that runs as part of the test suite. Any violation causes a test failure.
+
+---
+
+## Testing
+
+The project includes an automated test suite covering architectural boundaries, application use cases, REST endpoints, and WebSocket connections.
+
+### Running tests
+
+Using the self-contained test runner (no external dependencies required):
+
+```bash
+python tests/run_tests.py
+```
+
+Using pytest with coverage:
+
+```bash
+pip install -r requirements-dev.txt
+pytest -v --cov=app --cov-report=term-missing
+```
+
+### Test suite composition
+
+| Category | Location | Scope |
+| :--- | :--- | :--- |
+| Architecture isolation | `tests/unit/test_architecture_isolation.py` | AST inspection enforcing zero framework imports in domain and application layers |
+| Unit tests | `tests/unit/` | AuthService, RoomService, and ChatService using in-memory fakes |
+| Integration tests | `tests/integration/` | HTTP endpoints for registration, login, profile, room creation, joining, and pagination |
+| WebSocket tests | `tests/websocket/` | Real-time connections, message delivery, and unauthorized (1008) disconnections |
+
+---
+
+## CI/CD Pipeline
+
+Continuous Integration is configured using GitHub Actions (`.github/workflows/ci.yml`) and runs on every push and pull request to the `main` branch.
+
+### Workflow stages
+
+1. **Linting and formatting**: Runs `ruff` to ensure clean code style and catch static analysis issues.
+2. **Test matrix**: Executes the test suite against Python `3.10`, `3.11`, and `3.12` with containerized service dependencies:
+   - `postgres:15-alpine`
+   - `redis:7-alpine`
+   - Applies database migrations (`alembic upgrade head`) before running tests.
+   - Generates coverage reports and uploads artifacts.
+3. **Docker validation**: Verifies that the production `Dockerfile` builds without errors.
