@@ -1,8 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
+
 from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.infrastructure.persistence.models.base import Base
+
+if TYPE_CHECKING:
+    from app.infrastructure.persistence.models.message_model import MessageModel
+    from app.infrastructure.persistence.models.room_model import RoomMemberModel
 
 
 class UserModel(Base):

@@ -1,8 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
 from sqlalchemy import DateTime, ForeignKey, Index, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.infrastructure.persistence.models.base import Base
+
+if TYPE_CHECKING:
+    from app.infrastructure.persistence.models.room_model import RoomModel
+    from app.infrastructure.persistence.models.user_model import UserModel
 
 
 class MessageModel(Base):
