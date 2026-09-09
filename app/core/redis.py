@@ -25,9 +25,15 @@ class RedisClient:
     async def close_pool(cls) -> None:
         """Gracefully close Redis pool on application shutdown."""
         if cls._client:
-            await cls._client.close()
+            if hasattr(cls._client, "aclose"):
+                await cls._client.aclose()
+            else:
+                await cls._client.close()
         if cls._pool:
-            await cls._pool.disconnect()
+            if hasattr(cls._pool, "adisconnect"):
+                await cls._pool.adisconnect()
+            else:
+                await cls._pool.disconnect()
         cls._client = None
         cls._pool = None
 

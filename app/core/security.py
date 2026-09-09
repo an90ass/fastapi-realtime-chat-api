@@ -8,38 +8,53 @@ from app.core.config import settings
 
 # --- Password Hashing Setup with Resilient Fallbacks ---
 try:
-    from passlib.context import CryptContext
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    import bcrypt
 
     def hash_password(password: str) -> str:
-        return pwd_context.hash(password)
+        # bcrypt handles maximum 72 bytes
+        pwd_bytes = password.encode("utf-8")[:72]
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
     def verify_password(plain_password: str, hashed_password: str) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
+        try:
+            pwd_bytes = plain_password.encode("utf-8")[:72]
+            return bcrypt.checkpw(pwd_bytes, hashed_password.encode("utf-8"))
+        except Exception:
+            return False
 
 except ImportError:
     try:
-        import bcrypt
+        from passlib.context import CryptContext
+
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
         def hash_password(password: str) -> str:
-            salt = bcrypt.gensalt()
-            return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
-
-        def verify_password(plain_password: str, hashed_password: str) -> bool:
-            return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
-
-    except ImportError:
-        # Fallback to standard library PBKDF2-HMAC-SHA256
-        def hash_password(password: str) -> str:
-            salt = base64.b64encode(hashlib.sha256(password.encode()).digest()[:16]).decode()
-            derived = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000)
-            return f"pbkdf2_sha256${salt}${base64.b64encode(derived).decode()}"
+            return pwd_context.hash(password[:72])
 
         def verify_password(plain_password: str, hashed_password: str) -> bool:
             try:
-                algo, salt, hashed = hashed_password.split("$")
-                derived = hashlib.pbkdf2_hmac("sha256", plain_password.encode(), salt.encode(), 100000)
-                return hmac.compare_digest(base64.b64encode(derived).decode(), hashed)
+                return pwd_context.verify(plain_password[:72], hashed_password)
+            except Exception:
+                return False
+
+    except ImportError:
+        import os
+
+        # Cryptographically secure PBKDF2-HMAC-SHA256 fallback
+        def hash_password(password: str) -> str:
+            salt = os.urandom(16)
+            derived = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 100_000)
+            salt_b64 = base64.b64encode(salt).decode("ascii")
+            hash_b64 = base64.b64encode(derived).decode("ascii")
+            return f"pbkdf2_sha256${salt_b64}${hash_b64}"
+
+        def verify_password(plain_password: str, hashed_password: str) -> bool:
+            try:
+                algo, salt_b64, hash_b64 = hashed_password.split("$")
+                salt = base64.b64decode(salt_b64)
+                derived = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt, 100_000)
+                return hmac.compare_digest(base64.b64encode(derived).decode("ascii"), hash_b64)
             except Exception:
                 return False
 
