@@ -26,9 +26,9 @@ if config.config_file_name is not None:
 
 # Import all ORM models so Alembic detects them for autogenerate
 from app.infrastructure.persistence.models.base import Base
-from app.infrastructure.persistence.models.user_model import UserModel
-from app.infrastructure.persistence.models.room_model import RoomModel, RoomMemberModel
-from app.infrastructure.persistence.models.message_model import MessageModel
+from app.infrastructure.persistence.models.message_model import MessageModel  # noqa: F401
+from app.infrastructure.persistence.models.room_model import RoomMemberModel, RoomModel  # noqa: F401
+from app.infrastructure.persistence.models.user_model import UserModel  # noqa: F401
 
 target_metadata = Base.metadata
 

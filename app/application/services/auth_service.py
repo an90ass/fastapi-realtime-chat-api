@@ -12,8 +12,8 @@ Zero imports from: SQLAlchemy, FastAPI, Redis, or any Pydantic schema.
 """
 
 from app.application.commands import (
-    AuthTokenResult,
     AuthenticateUserCommand,
+    AuthTokenResult,
     RegisterUserCommand,
 )
 from app.core.exceptions import AuthenticationError, EntityAlreadyExistsError

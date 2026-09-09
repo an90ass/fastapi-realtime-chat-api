@@ -58,6 +58,7 @@ class CreateRoomCommand:
 @dataclass(frozen=True)
 class MessagePageResult:
     """Paginated message list returned by the ChatService use case."""
-    items: tuple          # Tuple[MessageEntity, ...]
+
+    items: tuple  # Tuple[MessageEntity, ...]
     next_cursor: Optional[int]
     has_more: bool

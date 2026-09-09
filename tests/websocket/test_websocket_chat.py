@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 import json
+
 from starlette.websockets import WebSocketDisconnect
 
 
@@ -55,9 +56,11 @@ def test_websocket_connection_and_message_broadcast(test_client):
 def test_websocket_invalid_token_rejected_with_1008(test_client):
     _, room_id = _setup_user_and_room(test_client, "chatter2", "chatter2@test.com", "Chatroom Beta")
 
-    with assert_raises_ws_disconnect(1008):
-        with test_client.websocket_connect(f"/chat/ws/{room_id}?token=invalid_token_12345"):
-            pass
+    with (
+        assert_raises_ws_disconnect(1008),
+        test_client.websocket_connect(f"/chat/ws/{room_id}?token=invalid_token_12345"),
+    ):
+        pass
 
 
 def test_websocket_non_member_rejected_with_1008(test_client):
@@ -74,6 +77,8 @@ def test_websocket_non_member_rejected_with_1008(test_client):
     )
     outsider_token = res.json()["access_token"]
 
-    with assert_raises_ws_disconnect(1008):
-        with test_client.websocket_connect(f"/chat/ws/{room_id}?token={outsider_token}"):
-            pass
+    with (
+        assert_raises_ws_disconnect(1008),
+        test_client.websocket_connect(f"/chat/ws/{room_id}?token={outsider_token}"),
+    ):
+        pass
