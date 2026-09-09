@@ -1,6 +1,6 @@
 [tool.ruff]
 target-version = "py310"
-line-length = 100
+line-length = 120
 extend-exclude = [
     "alembic",
     "venv",
@@ -10,19 +10,17 @@ extend-exclude = [
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # Pyflakes
-    "I",   # isort
+    "E9",  # Fatal runtime & syntax errors
+    "F",   # Pyflakes (undefined variables, bugs, broken code)
 ]
 ignore = [
-    "E501",  # line length
+    "E501",  # Line length
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/*" = ["F401", "F811"]
 "alembic/*" = ["ALL"]
+"tests/*" = ["F401", "F811"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

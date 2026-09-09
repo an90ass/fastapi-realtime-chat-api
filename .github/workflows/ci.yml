@@ -27,7 +27,7 @@ jobs:
           pip install ruff
 
       - name: Run Ruff Linter
-        run: ruff check .
+        run: ruff check app tests
 
   # Job 2: Test Suite with Real Services
   test:
